@@ -8,15 +8,35 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 			var group, textMesh1, textMesh2, textGeo, materials;
 
+			var posY = -100;
+
+			var rot, vel, acc;
+
+			var freq = 80;
+
 			var sphere;
+
+			// create web audio api context
+			var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+			var gainNode = audioCtx.createGain();
+			gainNode.gain.value = 1;
+
+			var oscillator = audioCtx.createOscillator();			
+
+			oscillator.type = 'sine';			
+			
+			oscillator.connect(gainNode);
+			gainNode.connect(audioCtx.destination);
+			oscillator.start();
 
 			var firstLetter = true;
 
-			var text = "danielo",
+			var text = "ciao danielo",
 
-				height = 20,
-				size = 120,
-				hover = 30,
+				height = 30,
+				size = 20,
+				hover = 100,
 
 				curveSegments = 4,
 
@@ -30,7 +50,7 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 				fontName = "optimer", // helvetiker, optimer, gentilis, droid sans, droid serif
 				fontWeight = "bold"; // normal bold
 
-			var mirror = true;
+			var mirror = false;
 
 			var fontMap = {
 
@@ -79,6 +99,10 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 			function init() {
 
+				rot = new THREE.Vector2( 0, 0);				
+				vel = new THREE.Vector2( 0, 0);				
+				acc = new THREE.Vector2( 0, 0);				
+
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
@@ -94,17 +118,13 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 				// SCENE
 
 				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0x000000 );
-				scene.fog = new THREE.Fog( 0x000000, 250, 1400 );
+				scene.background = new THREE.Color( 0xFFFFFF );
+				// scene.fog = new THREE.Fog( 0xFFFFFF, 250, 1400 );
 
 				// LIGHTS
 
-				var dirLight = new THREE.DirectionalLight( 0xffffff, 0.125 );
-				dirLight.position.set( 0, 0, 1 ).normalize();
-				scene.add( dirLight );
-
 				var pointLight = new THREE.PointLight( 0xffffff, 1.5 );
-				pointLight.position.set( 0, 100, 90 );
+				pointLight.position.set( 0, 500, 90 );			
 				scene.add( pointLight );
 
 				// Get text from hash
@@ -138,12 +158,17 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 				}				
 
-				var texture = new THREE.TextureLoader().load( "texture.png" );
+				var texture = new THREE.TextureLoader().load( "t3.png" );
 				texture.wrapS = THREE.RepeatWrapping;
 				texture.wrapT = THREE.RepeatWrapping;
-				texture.repeat.set( 2, 2 );
+				// texture.repeat.set( 2, 2 );
 
-				var geometry = new THREE.SphereGeometry( 15, 32, 32 );
+				var geometry = new THREE.SphereGeometry( 100, 32, 32 );
+				var m1 = new THREE.MeshPhongMaterial( { 
+				    color: 0xffffff, 				    
+				    shininess: 100,
+				    map:texture
+				} )
 				var material = new THREE.MeshBasicMaterial( {map:texture} );
 				sphere = new THREE.Mesh( geometry, material );				
 				scene.add( sphere );
@@ -152,7 +177,7 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 					// new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } ), // front
 					// new THREE.MeshPhongMaterial( { color: 0xffffff } ) // side
 					new THREE.MeshPhongMaterial( {
-					    color: 0xffffff,
+					    color: 0xffff00,
 					    specular:0xffffff,					    
 					    combine: THREE.MultiplyOperation,
 					    shininess: 50,
@@ -160,7 +185,7 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 					}),
 
 					new THREE.MeshPhongMaterial( {
-					    color: 0xffffff,
+					    color: 0xffff00,
 					    specular:0xffffff,					    
 					    combine: THREE.MultiplyOperation,
 					    shininess: 50,
@@ -169,15 +194,17 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 				];
 
 				group = new THREE.Group();
-				group.position.y = 100;
+				group.position.y = 10;
+				group.position.x = 0;
+				group.position.z = -200;
 
-				scene.add( group );
+				// scene.add( group );
 
 				loadFont();
 
 				var plane = new THREE.Mesh(
 					new THREE.PlaneBufferGeometry( 10000, 10000 ),
-					new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.5, transparent: true } )
+					new THREE.MeshBasicMaterial( { color: 0xffffff } )
 				);
 				plane.position.y = 100;
 				plane.rotation.x = - Math.PI / 2;
@@ -522,10 +549,19 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 			function render() {
 
-				sphere.position.set(0,300,10);
-				sphere.rotation.y += 0.1;
+				vel.add(acc)
+				rot.add(vel)
+				acc.multiplyScalar(0)
+				vel.multiplyScalar(0.995)
 
-				group.rotation.y += ( targetRotation - group.rotation.y ) * 0.05;
+				sphere.position.y = -vel.x*100;								
+				sphere.rotation.y = rot.x;
+				oscillator.frequency.setValueAtTime(vel.x*800, audioCtx.currentTime); // value in hertz			
+				gainNode.gain.value = vel.x;
+
+
+				// group.rotation.y += ( targetRotation - group.rotation.y ) * 0.05;
+				group.rotation.y += 0.015;
 
 				camera.lookAt( cameraTarget );
 
@@ -535,3 +571,25 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 
 			}
+
+			var container = document.body
+		if (container.addEventListener) {
+			// IE9, Chrome, Safari, Opera
+			container.addEventListener("mousewheel", MouseWheelHandler, false);
+			// Firefox
+			container.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
+		}
+		// IE 6/7/8
+		else container.attachEvent("onmousewheel", MouseWheelHandler);
+
+		function MouseWheelHandler(e) {
+			if (e.deltaY < 0) {		    
+			// mesh.rotation.y = mesh.rotation.y+0.15; 		    
+			acc.x+= 0.01;
+		  }
+		  if (e.deltaY > 0) {		    
+		  	console.log("-")
+		  	acc.x-= 0.01;
+		   // mesh.rotation.y = mesh.rotation.y-0.15; 		    
+		  }		  
+		}
