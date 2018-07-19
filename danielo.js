@@ -7,6 +7,7 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 			var camera, cameraTarget, scene, renderer;
 
 			var group, textMesh1, textMesh2, textGeo, materials;
+			var congrats = false;
 
 			var posY = -100;
 
@@ -196,9 +197,10 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 				group = new THREE.Group();
 				group.position.y = 10;
 				group.position.x = 0;
-				group.position.z = -200;
+				group.position.z = 180;
 
-				// scene.add( group );
+				scene.add( group );
+				group.visible = false
 
 				loadFont();
 
@@ -551,11 +553,21 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 				vel.add(acc)
 				rot.add(vel)
-				acc.multiplyScalar(0)
-				vel.multiplyScalar(0.995)
-
-				sphere.position.y = -vel.x*100;								
+				acc.multiplyScalar(0)								
 				sphere.rotation.y = rot.x;
+
+				if (sphere.position.y > 200) {
+					congrats = true;
+					group.visible = true;
+				}
+
+				if (congrats) {
+					sphere.position.y = 200;						
+				} else {
+					sphere.position.y = -vel.x*100;													
+					vel.multiplyScalar(0.995)				
+				}
+				
 				oscillator.frequency.setValueAtTime(vel.x*800, audioCtx.currentTime); // value in hertz			
 				gainNode.gain.value = vel.x;
 
