@@ -637,10 +637,10 @@ function handleTouchMove(evt) {
     } else {
         if ( yDiff > 0 ) {
             /* up swipe */ 
-		acc.x+= 0.07;
+		acc.x+= 0.12;
         } else { 
             /* down swipe */
-		acc.x-= 0.07;
+		acc.x-= 0.12;
         }                                                                 
     }
     /* reset values */
