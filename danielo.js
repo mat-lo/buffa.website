@@ -649,17 +649,17 @@ function handleTouchMove(evt) {
 };
 
 
-document.addEventListener("touchmove", ScrollStart, false);
-document.addEventListener("scroll", Scroll, false);
+// document.addEventListener("touchmove", ScrollStart, false);
+// document.addEventListener("scroll", Scroll, false);
 
-function ScrollStart() {
-    //start of scroll event for iOS
-	acc.x+= 0.02;
-}
+// function ScrollStart() {
+//     //start of scroll event for iOS
+// 	acc.x+= 0.02;
+// }
 
-function Scroll() {
-    //end of scroll event for iOS
-    //and
-    //start/end of scroll event for other browsers
-	acc.x+= 0.02;
-}
+// function Scroll() {
+//     //end of scroll event for iOS
+//     //and
+//     //start/end of scroll event for other browsers
+// 	acc.x+= 0.02;
+// }
