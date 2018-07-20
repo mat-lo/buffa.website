@@ -637,10 +637,10 @@ function handleTouchMove(evt) {
     } else {
         if ( yDiff > 0 ) {
             /* up swipe */ 
-		acc.x+= 0.04;
+		acc.x+= 0.02;
         } else { 
             /* down swipe */
-		acc.x-= 0.04;
+		acc.x-= 0.02;
         }                                                                 
     }
     /* reset values */
@@ -654,12 +654,12 @@ document.addEventListener("scroll", Scroll, false);
 
 function ScrollStart() {
     //start of scroll event for iOS
-	acc.x+= 0.04;
+	acc.x+= 0.02;
 }
 
 function Scroll() {
     //end of scroll event for iOS
     //and
     //start/end of scroll event for other browsers
-	acc.x+= 0.04;
+	acc.x+= 0.02;
 }
